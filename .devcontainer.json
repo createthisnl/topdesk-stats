@@ -1,5 +1,5 @@
 {
-    "name": "createthisnl/topdesk-stats",
+    "name": "createthisnl/topdesk_stats",
     "image": "mcr.microsoft.com/devcontainers/python:3.13",
     "postCreateCommand": "scripts/setup",
     "forwardPorts": [

@@ -9,6 +9,6 @@ homeassistant:
 logger:
   default: info
   logs:
-    custom_components.topdesk-stats: debug
+    custom_components.topdesk_stats: debug
 
 isal:

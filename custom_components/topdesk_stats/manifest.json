@@ -1,0 +1,12 @@
+{
+  "domain": "topdesk_stats",
+  "name": "TOPdesk statistics",
+  "codeowners": [
+    "@createthisnl"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/createthisnl/topdesk_stats",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/createthisnl/topdesk_stats",
+  "version": "0.0.1"
+}

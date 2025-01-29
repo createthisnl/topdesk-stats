@@ -1,4 +1,4 @@
-"""DataUpdateCoordinator for topdesk-stats."""
+"""DataUpdateCoordinator for topdesk_stats."""
 
 from __future__ import annotations
 

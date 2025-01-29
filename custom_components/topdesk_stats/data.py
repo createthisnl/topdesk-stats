@@ -1,4 +1,4 @@
-"""Custom types for topdesk-stats."""
+"""Custom types for topdesk_stats."""
 
 from __future__ import annotations
 

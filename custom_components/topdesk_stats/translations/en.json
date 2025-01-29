@@ -2,7 +2,7 @@
     "config": {
         "step": {
             "user": {
-                "description": "If you need help with the configuration have a look here: https://github.com/createthisnl/topdesk-stats",
+                "description": "If you need help with the configuration have a look here: https://github.com/createthisnl/topdesk_stats",
                 "data": {
                     "username": "Username",
                     "password": "Password"

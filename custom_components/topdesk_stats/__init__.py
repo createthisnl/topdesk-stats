@@ -1,8 +1,8 @@
 """
-Custom integration to integrate topdesk-stats with Home Assistant.
+Custom integration to integrate topdesk_stats with Home Assistant.
 
 For more details about this integration, please refer to
-https://github.com/createthisnl/topdesk-stats
+https://github.com/createthisnl/topdesk_stats
 """
 
 from __future__ import annotations
