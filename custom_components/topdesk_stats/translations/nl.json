@@ -2,20 +2,20 @@
     "config": {
         "step": {
             "user": {
-                "title": "Configure your TOPdesk instance",
-                "description": "Integrate with TOPdesk to fetch and monitor tickets.",
+                "title": "Stel hier jouw TOPdesk server in",
+                "description": "Integreer met TOPdesk om het verloop van je tickets in de gaten te houden.",
                 "data": {
-                    "instance_name": "Name",
+                    "instance_name": "Benaming",
                     "host": "TOPdesk URL",
-                    "username": "API account username",
-                    "app_password": "API application password",
+                    "username": "API account gebruikersnaam",
+                    "app_password": "API applicatie wachtwoord",
                     "status_filter": "Status filter"
                 },
                 "data_description": {
-                    "instance_name": "The name of your TOPdesk instance",
-                    "host": "The base TOPdesk URL with https://",
-                    "username": "The username to access your instance",
-                    "app_password": "The application password to access your instance",
+                    "instance_name": "De naam van jouw TOPdesk omgeving",
+                    "host": "De basis TOPdesk URL, begint met https://",
+                    "username": "De gebruikersnaam van het API account",
+                    "app_password": "Het applicatiewachtwoord van het API account",
                     "status_filter": "Status filter"
                 }
             }
@@ -34,26 +34,26 @@
         },
         "step": {
             "init": {
-                "title": "TOPdesk configuration",
-                "description": "Change some settings",
+                "title": "TOPdesk instellingen",
+                "description": "Pas wat instellingen aan",
                 "data": {
                     "update_interval": "Update interval"
                 },
                 "data_description": {
-                    "update_interval": "The interval at which changes are monitored"
+                    "update_interval": "De interval waarmee gecontroleerd wordt op wijzigingen"
                 }
             }
         }
     },
     "services": {
         "trigger_update": {
-            "name": "Trigger update",
-            "description": "Manually refresh data from TOPdesk",
+            "name": "Handmatig verversen",
+            "description": "Haal handmatig nieuwe data op van TOPdesk",
             "fields": {
                 "instance_name": {
-                    "name": "Instance name",
-                    "description": "Name of the TOPdesk instance (leave empty for all)",
-                    "example": "My Company"
+                    "name": "Instantienaam",
+                    "description": "Naam van de TOPdesk instantie (laat leeg voor alle)",
+                    "example": "Mijn Bedrijf"
                 }
             }
         }
@@ -61,20 +61,20 @@
     "entity": {
         "sensor": {
             "incident_completed_tickets": {
-                "name": "Completed tickets",
-                "unit_of_measurement": "incidents"
+                "name": "Meldingen gereed",
+                "unit_of_measurement": "meldingen"
             },
             "incident_closed_completed_count": {
-                "name": "Closed and completed tickets",
-                "unit_of_measurement": "incidents"
+                "name": "Meldingen afgesloten",
+                "unit_of_measurement": "meldingen"
             },
             "incident_new_tickets_today": {
-                "name": "New tickets today",
-                "unit_of_measurement": "incidents"
+                "name": "Meldingen nieuw vandaag",
+                "unit_of_measurement": "meldingen"
             },
             "incident_completed_tickets_today": {
-                "name": "Completed tickets today",
-                "unit_of_measurement": "incidents"
+                "name": "Meldingen gereedgemeld vandaag",
+                "unit_of_measurement": "meldingen"
             }
         }
     }

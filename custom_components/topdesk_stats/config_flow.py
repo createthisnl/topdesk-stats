@@ -1,89 +1,128 @@
-"""Adds config flow for Blueprint."""
-
 from __future__ import annotations
+
+import logging
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
-from homeassistant.helpers import selector
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
-from slugify import slugify
+from homeassistant.core import callback
+from homeassistant.helpers import config_validation as cv
 
-from .api import (
-    IntegrationBlueprintApiClient,
-    IntegrationBlueprintApiClientAuthenticationError,
-    IntegrationBlueprintApiClientCommunicationError,
-    IntegrationBlueprintApiClientError,
-)
-from .const import DOMAIN, LOGGER
+from .api import TOPdeskAPI
+from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN
+
+_LOGGER = logging.getLogger(__name__)
 
 
-class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-    """Config flow for Blueprint."""
+class TopdeskConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for TOPdesk."""
 
     VERSION = 1
 
-    async def async_step_user(
-        self,
-        user_input: dict | None = None,
-    ) -> config_entries.ConfigFlowResult:
-        """Handle a flow initialized by the user."""
-        _errors = {}
+    async def async_step_user(self, user_input=None):
+        """Handle the initial step."""
+        errors = {}
+        error_details = {}
+
         if user_input is not None:
             try:
-                await self._test_credentials(
-                    username=user_input[CONF_USERNAME],
-                    password=user_input[CONF_PASSWORD],
+                api = TOPdeskAPI(
+                    user_input["host"],
+                    user_input["username"],
+                    user_input["app_password"],
+                    user_input["instance_name"],
                 )
-            except IntegrationBlueprintApiClientAuthenticationError as exception:
-                LOGGER.warning(exception)
-                _errors["base"] = "auth"
-            except IntegrationBlueprintApiClientCommunicationError as exception:
-                LOGGER.error(exception)
-                _errors["base"] = "connection"
-            except IntegrationBlueprintApiClientError as exception:
-                LOGGER.exception(exception)
-                _errors["base"] = "unknown"
-            else:
-                await self.async_set_unique_id(
-                    ## Do NOT use this in production code
-                    ## The unique_id should never be something that can change
-                    ## https://developers.home-assistant.io/docs/config_entries_config_flow_handler#unique-ids
-                    unique_id=slugify(user_input[CONF_USERNAME])
-                )
-                self._abort_if_unique_id_configured()
+                api.instance_name = user_input[
+                    "instance_name"
+                ]  # Sets the users instance name
+                await api.test_connection()
+
                 return self.async_create_entry(
-                    title=user_input[CONF_USERNAME],
-                    data=user_input,
+                    title=user_input["instance_name"], data=user_input
                 )
+            except ValueError as e:
+                error_msg = str(e)
+                _LOGGER.error("Error in TOPdeskConfigFlow: %s", error_msg)
+                if error_msg == "connection_error":
+                    errors["base"] = "connection_error"
+                    error_details["error_detail"] = error_msg
+                elif error_msg == "http_error":
+                    errors["base"] = "cannot_connect"
+                    error_details["error_detail"] = error_msg
+                else:
+                    errors["base"] = "unknown_error"
+                    error_details["error_detail"] = error_msg
+
+        data_schema = vol.Schema(
+            {
+                vol.Required("instance_name"): str,
+                vol.Required("host"): str,
+                vol.Required("username"): str,
+                vol.Required("app_password"): str,
+            }
+        )
 
         return self.async_show_form(
-            step_id="user",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(
-                        CONF_USERNAME,
-                        default=(user_input or {}).get(CONF_USERNAME, vol.UNDEFINED),
-                    ): selector.TextSelector(
-                        selector.TextSelectorConfig(
-                            type=selector.TextSelectorType.TEXT,
-                        ),
-                    ),
-                    vol.Required(CONF_PASSWORD): selector.TextSelector(
-                        selector.TextSelectorConfig(
-                            type=selector.TextSelectorType.PASSWORD,
-                        ),
-                    ),
-                },
-            ),
-            errors=_errors,
+            step_id="user", data_schema=data_schema, errors=errors
+        )
+        """
+        errors = {}
+
+        if user_input is not None:
+            try:
+                # Validatie logica hier
+                return self.async_create_entry(
+                    title=user_input["instance_name"],
+                    data=user_input,
+                    options={"update_interval": DEFAULT_UPDATE_INTERVAL},
+                )
+            except Exception as err:
+                errors["base"] = "connection_error"
+
+        data_schema = vol.Schema(
+            {
+                vol.Required("instance_name"): str,
+                vol.Required("host"): str,
+                vol.Required("username"): str,
+                vol.Required("app_password"): str,
+            }
         )
 
-    async def _test_credentials(self, username: str, password: str) -> None:
-        """Validate credentials."""
-        client = IntegrationBlueprintApiClient(
-            username=username,
-            password=password,
-            session=async_create_clientsession(self.hass),
+        return self.async_show_form(
+            step_id="user", data_schema=data_schema, errors=errors
         )
-        await client.async_get_data()
+    """
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        """Get the options flow."""
+        return TopdeskOptionsFlowHandler(config_entry)
+
+
+class TopdeskOptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle TOPdesk options."""
+
+    def __init__(self, config_entry):
+        super().__init__()
+
+    async def async_step_init(self, user_input=None):
+        """Manage the options."""
+        errors = {}
+
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        options_schema = vol.Schema(
+            {
+                vol.Required(
+                    "update_interval",
+                    default=self.config_entry.options.get(
+                        "update_interval", DEFAULT_UPDATE_INTERVAL
+                    ),
+                ): cv.positive_int
+            }
+        )
+
+        return self.async_show_form(
+            step_id="init", data_schema=options_schema, errors=errors
+        )

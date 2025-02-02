@@ -1,0 +1,10 @@
+trigger_update:
+  name: Trigger update
+  description: Manually refresh data from TOPdesk
+  fields:
+    instance_name:
+      name: Instance name
+      description: The name of your instance
+      example: "My Company"
+      selector:
+        text:
