@@ -5,25 +5,28 @@
                 "title": "Configure your TOPdesk instance",
                 "description": "Integrate with TOPdesk to fetch and monitor tickets.",
                 "data": {
-                    "instance_name": "Name",
-                    "host": "TOPdesk URL",
-                    "username": "API account username",
-                    "app_password": "API application password",
-                    "status_filter": "Status filter"
+                    "instance_name": "Instance name",
+                    "instance_host": "TOPdesk URL",
+                    "instance_username": "API account username",
+                    "instance_password": "API application password",
+                    "enable_incidents": "Incidents",
+                    "enable_changes": "Changes"
                 },
                 "data_description": {
                     "instance_name": "The name of your TOPdesk instance",
-                    "host": "The base TOPdesk URL with https://",
-                    "username": "The username to access your instance",
-                    "app_password": "The application password to access your instance",
-                    "status_filter": "Status filter"
+                    "instance_host": "The base TOPdesk URL with https://",
+                    "instance_username": "The username to access your instance",
+                    "instance_password": "The application password to access your instance",
+                    "enable_incidents": "Get incident data",
+                    "enable_changes": "Get change data"
                 }
             }
         },
         "error": {
             "connection_error": "Unable to connect to your TOPdesk instance. Please check your configuration. \n {error_detail}",
-            "authentrication_error": "Personal Access Token is not correct",
+            "error_occured": "An error occured: {error_detail}",
             "connection_timeout": "Connection timeout.",
+            "invalid_url": "Given URL is invalid. Needs to start with https://.",
             "unknown_error": "Unknown error: {error_detail}"
         }
     },
@@ -37,10 +40,22 @@
                 "title": "TOPdesk configuration",
                 "description": "Change some settings",
                 "data": {
-                    "update_interval": "Update interval"
+                    "update_interval": "Update interval",
+                    "instance_name": "Instance name",
+                    "instance_host": "TOPdesk URL",
+                    "instance_username": "API account username",
+                    "instance_password": "API application password",
+                    "enable_incidents": "Incidents",
+                    "enable_changes": "Changes"
                 },
                 "data_description": {
-                    "update_interval": "The interval at which changes are monitored"
+                    "update_interval": "The interval at which changes are monitored",
+                    "instance_name": "The name of your TOPdesk instance",
+                    "instance_host": "The base TOPdesk URL with https://",
+                    "instance_username": "The username to access your instance",
+                    "instance_password": "The application password to access your instance",
+                    "enable_incidents": "Get incident data",
+                    "enable_changes": "Get change data"
                 }
             }
         }

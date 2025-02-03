@@ -1,20 +1,32 @@
+"""
+Entity for TOPdesk Statistics integration.
+
+topdesk_stats/entity.py
+"""
+
 from __future__ import annotations
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+import logging
+from typing import Any
+
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class TOPdeskBaseEntity(CoordinatorEntity, SensorEntity):
     """Base entity for TOPdesk sensors."""
 
-    def __init__(self, coordinator, entity_id, name):
+    def __init__(self, coordinator, entity_id, name) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
-        self._attr_entity_id = (
-            entity_id  # Gebruik _attr_entity_id in plaats van self.entity_id
-        )
+        self._attr_entity_id = entity_id
         self._attr_name = name
+        _LOGGER.debug("DEBUG check for self._attr_entity_id: %s", self._attr_entity_id)
+        _LOGGER.debug("DEBUG check for self._attr_name: %s", self._attr_name)
 
     @property
-    def native_value(self):
+    def native_value(self) -> Any:
         """Return the current value of the sensor."""
         return self.coordinator.data.get(self.entity_id)

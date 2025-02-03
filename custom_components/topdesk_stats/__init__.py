@@ -1,18 +1,37 @@
+"""
+TOPdesk Statistics integration.
+
+topdesk_stats/__init__.py.
+"""
+
 from __future__ import annotations
 
 import logging
 from datetime import timedelta
+from typing import TYPE_CHECKING
 
 import voluptuous as vol
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
 
 from .api import TOPdeskAPI
-from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN
+from .const import (
+    CONF_INSTANCE_HOST,
+    CONF_INSTANCE_NAME,
+    CONF_INSTANCE_PASSWORD,
+    CONF_INSTANCE_USERNAME,
+    CONF_UPDATE_INTERVAL,
+    DEFAULT_UPDATE_INTERVAL,
+    DOMAIN,
+)
 from .coordinator import TopdeskDataUpdateCoordinator
 
+if TYPE_CHECKING:
+    from homeassistant.config_entries import ConfigEntry
+    from homeassistant.core import HomeAssistant, ServiceCall
+
 _LOGGER = logging.getLogger(__name__)
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -23,21 +42,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if not hass.data[DOMAIN]["service_registered"]:
         _LOGGER.debug("Registering service...")
 
+        available_instances = [
+            c.config_entry.data[CONF_INSTANCE_NAME]
+            for c in hass.data[DOMAIN]["coordinators"].values()
+        ]
+
         async def async_trigger_update(call: ServiceCall) -> None:
             """Handle service call."""
-            instance_name = call.data.get("instance_name")
+            instance_name = call.data.get(CONF_INSTANCE_NAME)
             _LOGGER.debug(
                 "Manually refresh data for instance: %s",
                 instance_name or "all instances",
             )
 
-            _LOGGER.debug(
-                "Available instances: %s",
-                [
-                    c.config_entry.data["instance_name"]
-                    for c in hass.data[DOMAIN]["coordinators"].values()
-                ],
-            )
+            _LOGGER.debug("Available instances: %s", available_instances)
 
             if DOMAIN not in hass.data or "coordinators" not in hass.data[DOMAIN]:
                 _LOGGER.error("No TOPdesk-coordinators found")
@@ -47,7 +65,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             for entry_id in list(hass.data[DOMAIN]["coordinators"].keys()):
                 coordinator = hass.data[DOMAIN]["coordinators"][entry_id]
                 config_name = coordinator.config_entry.data.get(
-                    "instance_name", "Unknown"
+                    CONF_INSTANCE_NAME, "Unknown"
                 )
 
                 if instance_name and config_name != instance_name:
@@ -58,8 +76,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     _LOGGER.info("Manually refresh data from %s", config_name)
                     await coordinator.async_request_refresh()
                     refreshed = True
-                except Exception as err:
-                    _LOGGER.error("Refresh failed from %s: %s", config_name, err)
+                except Exception:
+                    _LOGGER.exception("Refresh failed from %s:", config_name)
 
             if not refreshed:
                 _LOGGER.warning(
@@ -72,49 +90,62 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 DOMAIN,
                 "trigger_update",
                 async_trigger_update,
-                schema=vol.Schema({vol.Optional("instance_name"): str}),
+                schema=vol.Schema(
+                    {
+                        vol.Optional(CONF_INSTANCE_NAME): cv.string,
+                    }
+                ),
             )
             hass.data[DOMAIN]["service_registered"] = True
             _LOGGER.info("Service successfully registered")
-        except Exception as e:
-            _LOGGER.error("Service registration failed: %s", str(e))
+        except Exception:
+            _LOGGER.exception("Service registration failed:")
             return False
 
-    api = TOPdeskAPI(
-        entry.data["host"],
-        entry.data["username"],
-        entry.data["app_password"],
-        entry.data["instance_name"],
-    )
+    async with TOPdeskAPI(
+        entry.data[CONF_INSTANCE_HOST],
+        entry.data[CONF_INSTANCE_USERNAME],
+        entry.data[CONF_INSTANCE_PASSWORD],
+        entry.data[CONF_INSTANCE_NAME],
+    ) as api:
+        # Get version and tickets
+        await api.fetch_version()
+        await api.fetch_tickets()
+
+    config_entry_id = entry.entry_id
 
     update_interval = timedelta(
-        minutes=entry.options.get("update_interval", DEFAULT_UPDATE_INTERVAL)
+        minutes=entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
     )
-    coordinator = TopdeskDataUpdateCoordinator(hass, api, update_interval)
 
+    # Create the coordinator and provide the config_entry_id
+    coordinator = TopdeskDataUpdateCoordinator(
+        hass, api, update_interval, config_entry_id
+    )
+
+    # Start the coordinator
     await coordinator.async_config_entry_first_refresh()
 
-    # Directe coordinator opslag
     hass.data[DOMAIN]["coordinators"][entry.entry_id] = coordinator
 
-    # Moderne platform setup
+    # Platform setup
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     return True
 
 
-async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
+async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle options update."""
     await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Verwijder de integratie."""
+    """Delete the integration."""
     instance_name = "Unknown"
 
     if entry.entry_id in hass.data[DOMAIN]["coordinators"]:
         coordinator = hass.data[DOMAIN]["coordinators"][entry.entry_id]
-        instance_name = coordinator.config_entry.data.get("instance_name", "Unknown")
+        instance_name = coordinator.config_entry.data.get(CONF_INSTANCE_NAME, "Unknown")
         del hass.data[DOMAIN]["coordinators"][entry.entry_id]
 
     unload_ok = await hass.config_entries.async_unload_platforms(entry, ["sensor"])

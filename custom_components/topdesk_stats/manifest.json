@@ -4,15 +4,15 @@
   "codeowners": [
     "@createthisnl"
   ],
-  "iot_class": "cloud_polling",
+  "config_flow": true,
+  "dependencies": [],
   "documentation": "https://github.com/createthisnl/topdesk_stats",
+  "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/createthisnl/topdesk_stats/issues",
   "requirements": [
     "aiohttp",
     "pytz>=2023.3",
     "voluptuous>=0.13.1"
   ],
-  "dependencies": [],
-  "config_flow": true,
-  "version": "0.0.4"
+  "version": "0.0.5"
 }

@@ -6,25 +6,28 @@
                 "description": "Integreer met TOPdesk om het verloop van je tickets in de gaten te houden.",
                 "data": {
                     "instance_name": "Benaming",
-                    "host": "TOPdesk URL",
-                    "username": "API account gebruikersnaam",
-                    "app_password": "API applicatie wachtwoord",
-                    "status_filter": "Status filter"
+                    "instance_host": "TOPdesk URL",
+                    "instance_username": "API account gebruikersnaam",
+                    "instance_password": "API applicatie wachtwoord",
+                    "enable_incidents": "Meldingen",
+                    "enable_changes": "Wijzigingen"
                 },
                 "data_description": {
                     "instance_name": "De naam van jouw TOPdesk omgeving",
-                    "host": "De basis TOPdesk URL, begint met https://",
-                    "username": "De gebruikersnaam van het API account",
-                    "app_password": "Het applicatiewachtwoord van het API account",
-                    "status_filter": "Status filter"
+                    "instance_host": "De basis TOPdesk URL, begint met https://",
+                    "instance_username": "De gebruikersnaam van het API account",
+                    "instance_password": "Het applicatiewachtwoord van het API account",
+                    "enable_incidents": "Meldingen",
+                    "enable_changes": "Wijzigingen"
                 }
             }
         },
         "error": {
-            "connection_error": "Unable to connect to your TOPdesk instance. Please check your configuration. \n {error_detail}",
-            "authentrication_error": "Personal Access Token is not correct",
-            "connection_timeout": "Connection timeout.",
-            "unknown_error": "Unknown error: {error_detail}"
+            "connection_error": "Kan geen verbinding maken met jouw TOPdesk omgeving. Controleer je configuratie. \n({error_detail})",
+            "error_occured": "Er is een fout opgetreden: {error_detail}",
+            "connection_timeout": "Verbinding timeout.",
+            "invalid_url": "Ingevoerde URL is ongeldig. Moet beginnen met https://.",
+            "unknown_error": "Onbekende fout: {error_detail}"
         }
     },
     "options": {
@@ -37,10 +40,22 @@
                 "title": "TOPdesk instellingen",
                 "description": "Pas wat instellingen aan",
                 "data": {
-                    "update_interval": "Update interval"
+                    "update_interval": "Update interval",
+                    "instance_name": "Benaming",
+                    "instance_host": "TOPdesk URL",
+                    "instance_username": "API account gebruikersnaam",
+                    "instance_password": "API applicatie wachtwoord",
+                    "enable_incidents": "Meldingen",
+                    "enable_changes": "Wijzigingen"
                 },
                 "data_description": {
-                    "update_interval": "De interval waarmee gecontroleerd wordt op wijzigingen"
+                    "update_interval": "De interval waarmee de data bijgewerkt wordt.",
+                    "instance_name": "De naam van jouw TOPdesk omgeving",
+                    "instance_host": "De basis TOPdesk URL, begint met https://",
+                    "instance_username": "De gebruikersnaam van het API account",
+                    "instance_password": "Het applicatiewachtwoord van het API account",
+                    "enable_incidents": "Meldingen",
+                    "enable_changes": "Wijzigingen"
                 }
             }
         }
