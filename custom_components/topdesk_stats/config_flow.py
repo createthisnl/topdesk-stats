@@ -43,7 +43,7 @@ DATA_SCHEMA = vol.Schema(
 _LOGGER = logging.getLogger(__name__)
 
 
-class TopdeskConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class TOPdeskConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for TOPdesk."""
 
     VERSION = 1
@@ -107,12 +107,12 @@ class TopdeskConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(
         config_entry: config_entries.ConfigEntry,
-    ) -> TopdeskOptionsFlowHandler:
+    ) -> TOPdeskOptionsFlowHandler:
         """Get the options flow."""
-        return TopdeskOptionsFlowHandler(config_entry)
+        return TOPdeskOptionsFlowHandler(config_entry)
 
 
-class TopdeskOptionsFlowHandler(config_entries.OptionsFlow):
+class TOPdeskOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle TOPdesk options."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:

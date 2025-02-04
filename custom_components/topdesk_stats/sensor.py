@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-    from .coordinator import TopdeskDataUpdateCoordinator
+    from .coordinator import TOPdeskDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ async def async_setup_entry(
     for description in TOPDESK_INCIDENT_SENSORS:
         if description.exists_fn(coordinator_incidents):
             entities.append(
-                TopdeskSensor(coordinator_incidents, description, instance_name)
+                TOPdeskSensor(coordinator_incidents, description, instance_name)
             )
             _LOGGER.debug(
                 "Added incident sensor %s for instance %s",
@@ -66,7 +66,7 @@ async def async_setup_entry(
     for description in TOPDESK_CHANGE_SENSORS:
         if description.exists_fn(coordinator_changes):
             entities.append(
-                TopdeskSensor(coordinator_changes, description, instance_name)
+                TOPdeskSensor(coordinator_changes, description, instance_name)
             )
             _LOGGER.debug(
                 "Added change sensor %s for instance %s",
@@ -78,7 +78,7 @@ async def async_setup_entry(
     _LOGGER.debug("Added %d sensors for instance %s", len(entities), instance_name)
 
 
-class TopdeskSensor(CoordinatorEntity, SensorEntity):
+class TOPdeskSensor(CoordinatorEntity, SensorEntity):
     """Represents a TOPdesk sensor entity."""
 
     _attr_has_entity_name = True
@@ -86,7 +86,7 @@ class TopdeskSensor(CoordinatorEntity, SensorEntity):
 
     def __init__(
         self,
-        coordinator: TopdeskDataUpdateCoordinator,
+        coordinator: TOPdeskDataUpdateCoordinator,
         entity_description: TOPdeskSensorEntityDescription,
         instance_name: str,
     ) -> None:

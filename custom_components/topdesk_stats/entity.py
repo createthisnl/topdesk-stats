@@ -7,10 +7,13 @@ topdesk_stats/entity.py
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+if TYPE_CHECKING:
+    from .coordinator import TOPdeskDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,7 +21,9 @@ _LOGGER = logging.getLogger(__name__)
 class TOPdeskBaseEntity(CoordinatorEntity, SensorEntity):
     """Base entity for TOPdesk sensors."""
 
-    def __init__(self, coordinator, entity_id, name) -> None:
+    def __init__(
+        self, coordinator: TOPdeskDataUpdateCoordinator, entity_id: str, name: str
+    ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_entity_id = entity_id

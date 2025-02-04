@@ -46,7 +46,7 @@ def raise_update_failed(msg: str) -> None:
     raise UpdateFailed(msg)
 
 
-class TopdeskDataUpdateCoordinator(DataUpdateCoordinator):
+class TOPdeskDataUpdateCoordinator(DataUpdateCoordinator):
     """Manages data updates for TOPdesk integration."""
 
     def __init__(

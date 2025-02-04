@@ -25,7 +25,7 @@ from .const import (
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
 )
-from .coordinator import TopdeskDataUpdateCoordinator
+from .coordinator import TOPdeskDataUpdateCoordinator
 
 if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
@@ -137,7 +137,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         api_type=API_CHANGE_TYPE,
     )
 
-    coordinator_incidents = TopdeskDataUpdateCoordinator(
+    coordinator_incidents = TOPdeskDataUpdateCoordinator(
         hass,
         api_incidents,
         update_interval,
@@ -145,7 +145,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         api_type=API_INCIDENT_TYPE,
     )
 
-    coordinator_changes = TopdeskDataUpdateCoordinator(
+    coordinator_changes = TOPdeskDataUpdateCoordinator(
         hass, api_changes, update_interval, config_entry_id, api_type=API_CHANGE_TYPE
     )
 
