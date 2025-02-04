@@ -15,6 +15,8 @@ from homeassistant.helpers import config_validation as cv
 
 from .api import TOPdeskAPI
 from .const import (
+    API_CHANGE_TYPE,
+    API_INCIDENT_TYPE,
     CONF_INSTANCE_HOST,
     CONF_INSTANCE_NAME,
     CONF_INSTANCE_PASSWORD,
@@ -118,15 +120,44 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         minutes=entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
     )
 
-    # Create the coordinator and provide the config_entry_id
-    coordinator = TopdeskDataUpdateCoordinator(
-        hass, api, update_interval, config_entry_id
+    # Create multiple API instances, for example, for incidents and changes
+    api_incidents = TOPdeskAPI(
+        entry.data[CONF_INSTANCE_HOST],
+        entry.data[CONF_INSTANCE_USERNAME],
+        entry.data[CONF_INSTANCE_PASSWORD],
+        entry.data[CONF_INSTANCE_NAME],
+        api_type=API_INCIDENT_TYPE,
     )
 
-    # Start the coordinator
-    await coordinator.async_config_entry_first_refresh()
+    api_changes = TOPdeskAPI(
+        entry.data[CONF_INSTANCE_HOST],
+        entry.data[CONF_INSTANCE_USERNAME],
+        entry.data[CONF_INSTANCE_PASSWORD],
+        entry.data[CONF_INSTANCE_NAME],
+        api_type=API_CHANGE_TYPE,
+    )
 
-    hass.data[DOMAIN]["coordinators"][entry.entry_id] = coordinator
+    coordinator_incidents = TopdeskDataUpdateCoordinator(
+        hass,
+        api_incidents,
+        update_interval,
+        config_entry_id,
+        api_type=API_INCIDENT_TYPE,
+    )
+
+    coordinator_changes = TopdeskDataUpdateCoordinator(
+        hass, api_changes, update_interval, config_entry_id, api_type=API_CHANGE_TYPE
+    )
+
+    # Start the coordinators
+    await coordinator_incidents.async_config_entry_first_refresh()
+    await coordinator_changes.async_config_entry_first_refresh()
+
+    # Save in Home Assistant data store
+    hass.data[DOMAIN]["coordinators"][entry.entry_id] = {
+        API_INCIDENT_TYPE: coordinator_incidents,
+        API_CHANGE_TYPE: coordinator_changes,
+    }
 
     # Platform setup
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
@@ -143,14 +174,26 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Delete the integration."""
     instance_name = "Unknown"
 
-    if entry.entry_id in hass.data[DOMAIN]["coordinators"]:
-        coordinator = hass.data[DOMAIN]["coordinators"][entry.entry_id]
-        instance_name = coordinator.config_entry.data.get(CONF_INSTANCE_NAME, "Unknown")
-        del hass.data[DOMAIN]["coordinators"][entry.entry_id]
+    # Get all coordinators
+    coordinators = hass.data[DOMAIN]["coordinators"].get(entry.entry_id, {})
 
+    # Check whether coordinators exist at all
+    if not coordinators:
+        _LOGGER.warning("No coordinators found for entry: %s", entry.entry_id)
+        return False
+
+    # Unload all coordinators
+    for api_type, coordinator in coordinators.items():
+        instance_name = coordinator.config_entry.data.get(CONF_INSTANCE_NAME, "Unknown")
+        _LOGGER.info("Unloading %s coordinator for %s", api_type, instance_name)
+
+    # Remove coordinators from storage
+    del hass.data[DOMAIN]["coordinators"][entry.entry_id]
+
+    # Unload the platforms
     unload_ok = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
 
-    # Only delete action if there are no instances left
+    # Check for other integrations, if not, remove service
     if not hass.data[DOMAIN]["coordinators"]:
         hass.services.async_remove(DOMAIN, "trigger_update")
         hass.data[DOMAIN]["service_registered"] = False

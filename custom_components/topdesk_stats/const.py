@@ -17,7 +17,9 @@ ATTRIBUTION = "Data provided by your own TOPdesk instance"
 DEFAULT_UPDATE_INTERVAL = 5  # minutes
 
 # API Endpoints for TOPdesk ODATA API
+API_INCIDENT_TYPE = "Incident Management"
 API_INCIDENT_BASE_PATH = "/services/reporting/v2/odata/Incidents/"
+API_CHANGE_TYPE = "Change Management"
 API_CHANGE_BASE_PATH = "/services/reporting/v2/odata/Changes/"
 
 # Sensor ID's

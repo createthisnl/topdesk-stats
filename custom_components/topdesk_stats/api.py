@@ -10,7 +10,7 @@ import base64
 import hashlib
 import logging
 import urllib.parse
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Self
 
 import aiohttp
@@ -18,11 +18,19 @@ from aiohttp import ClientError, ClientSession, ClientTimeout, InvalidURL
 
 from .const import (
     API_CHANGE_BASE_PATH,
+    API_CHANGE_TYPE,
     API_INCIDENT_BASE_PATH,
+    API_INCIDENT_TYPE,
     STATUS_200,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def get_past_date(days: int) -> str:
+    """Return a past date in OData format (YYYY-MM-DDTHH:MM:SSZ)."""
+    past_date = datetime.now(UTC) - timedelta(days=days)
+    return past_date.strftime("%Y-%m-%dT00:00:00Z")
 
 
 class TOPdeskAPI:
@@ -34,21 +42,20 @@ class TOPdeskAPI:
         instance_username: str,
         instance_password: str,
         instance_name: str,
-        api_type: str = "incident",  # Defaults to incidents
+        api_type: str = API_INCIDENT_TYPE,  # Defaults to API_INCIDENT_TYPE
     ) -> None:
         """Initialize for communication."""
         self.instance_name = instance_name
         self.instance_version = ""
         self.host = instance_host.rstrip("/")
-        self.api_type = api_type.lower()  # Make it case insensitive
+        self.api_type = api_type
 
         # Dynamically set the base_url based on api_type
-        if self.api_type == "change":
+        if self.api_type == API_CHANGE_TYPE:
             self.base_url = f"{self.host}{API_CHANGE_BASE_PATH}"
-        else:  # Defaults to incident
+        else:  # Defaults to API_INCIDENT_TYPE
             self.base_url = f"{self.host}{API_INCIDENT_BASE_PATH}"
 
-        self.base_url = f"{self.host}" + API_INCIDENT_BASE_PATH
         self.device_id = hashlib.sha256(
             f"{self.host}_{instance_name}".encode()
         ).hexdigest()[:10]
@@ -57,8 +64,12 @@ class TOPdeskAPI:
         ).decode()
         self.timeout = ClientTimeout(total=15)
         self.session = None  # The session will be initialized later
+
         _LOGGER.debug(
-            "Initialized TOPdeskAPI for %s: %s", self.instance_name, self.host
+            "[%s] Set TOPdeskAPI base url to: %s", self.instance_name, self.base_url
+        )
+        _LOGGER.debug(
+            "[%s] Initialized TOPdeskAPI with host: %s", self.instance_name, self.host
         )
 
     async def __aenter__(self) -> Self:
@@ -124,31 +135,57 @@ class TOPdeskAPI:
 
     async def fetch_tickets(
         self,
-    ) -> tuple[int | None, int | None, int | None, int | None]:
+    ) -> tuple[int | None, int | None, int | None, int | None, int | None]:
         """Fetch ticket counts using OData queries."""
         try:
             if self.session is None:
                 msg = "Session is not initialized"
                 raise ValueError(msg)  # noqa: TRY301
-            completed_count = await self._fetch_count(
-                self.session, "(completed eq true)"
+
+            total_tickets = await self._fetch_count(
+                self.session, "(creationDate gt 1970-01-01T00:00:00Z)"
             )
-            closed_completed_count = await self._fetch_count(
-                self.session, "(completed eq true) and (closed eq true)"
-            )
+
             new_today_count = await self._fetch_new_today_count(self.session)
-            completed_today_count = await self._fetch_completed_today_count(
-                self.session
-            )
-            return (  # noqa: TRY300
-                completed_count,
-                closed_completed_count,
-                new_today_count,
-                completed_today_count,
-            )
+
+            if self.api_type == API_INCIDENT_TYPE:
+                completed_count = await self._fetch_count(
+                    self.session, "(completed eq true)"
+                )
+                closed_completed_count = await self._fetch_count(
+                    self.session, "(completed eq true) and (closed eq true)"
+                )
+                completed_today_count = await self._fetch_completed_today_count(
+                    self.session
+                )
+
+            elif self.api_type == API_CHANGE_TYPE:
+                completed_count = await self._fetch_count(
+                    self.session, "(closed eq true)"
+                )
+                closed_completed_count = await self._fetch_count(
+                    self.session,
+                    f"(closed eq true) and (closureDate lt {get_past_date(7)})",
+                )
+                completed_today_count = await self._fetch_count(
+                    self.session,
+                    f"(creationDate ge {get_past_date(0)}) and (closed eq true)",
+                )
+            else:
+                _LOGGER.error("Unknown API type: %s", self.api_type)
+                return None, None, None, None, None
+
         except Exception:
             _LOGGER.exception("API error:")
-            return None, None, None, None
+            return None, None, None, None, None
+
+        return (
+            total_tickets,
+            completed_count,
+            closed_completed_count,
+            new_today_count,
+            completed_today_count,
+        )
 
     async def _fetch_new_today_count(self, session: ClientSession) -> int | None:
         """Fetch new tickets created today."""
@@ -157,11 +194,21 @@ class TOPdeskAPI:
         return await self._fetch_count(session, filter_query)
 
     async def _fetch_completed_today_count(self, session: ClientSession) -> int | None:
-        """Fetch completed tickets created today."""
-        today = datetime.now(UTC).strftime("%Y-%m-%dT00:00:00Z")
-        filter_query = (
-            f"(creationDate ge {today}) and (completed eq true) and (closed eq false)"
-        )
+        """Fetch completed tickets created today, adapted for incidents or changes."""
+        today = get_past_date(0)  # Vandaag
+        creation_date = f"(creationDate ge {today})"
+        if self.api_type == API_INCIDENT_TYPE:
+            filter_query = (
+                f"{creation_date} and (completed eq true) and (closed eq false)"
+            )
+        elif self.api_type == API_CHANGE_TYPE:
+            filter_query = f"{creation_date} and (closed eq true)"
+        else:
+            _LOGGER.error(
+                "Unknown API type in _fetch_completed_today_count: %s", self.api_type
+            )
+            return None
+
         return await self._fetch_count(session, filter_query)
 
     async def _fetch_count(

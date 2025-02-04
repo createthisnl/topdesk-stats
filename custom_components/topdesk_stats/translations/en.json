@@ -9,8 +9,8 @@
                     "instance_host": "TOPdesk URL",
                     "instance_username": "API account username",
                     "instance_password": "API application password",
-                    "enable_incidents": "Incidents",
-                    "enable_changes": "Changes"
+                    "enable_incidents": "Incident Management",
+                    "enable_changes": "Change Management"
                 },
                 "data_description": {
                     "instance_name": "The name of your TOPdesk instance",
@@ -45,8 +45,8 @@
                     "instance_host": "TOPdesk URL",
                     "instance_username": "API account username",
                     "instance_password": "API application password",
-                    "enable_incidents": "Incidents",
-                    "enable_changes": "Changes"
+                    "enable_incidents": "Incident Management",
+                    "enable_changes": "Change Management"
                 },
                 "data_description": {
                     "update_interval": "The interval at which changes are monitored",
@@ -75,6 +75,10 @@
     },
     "entity": {
         "sensor": {
+            "incident_total_tickets": {
+                "name": "Incident Total tickets",
+                "unit_of_measurement": "incidents"
+            },
             "incident_completed_tickets": {
                 "name": "Completed tickets",
                 "unit_of_measurement": "incidents"
@@ -90,6 +94,26 @@
             "incident_completed_tickets_today": {
                 "name": "Completed tickets today",
                 "unit_of_measurement": "incidents"
+            },
+            "change_total_tickets": {
+                "name": "Total tickets",
+                "unit_of_measurement": "changes"
+            },
+            "change_completed_tickets": {
+                "name": "Completed tickets",
+                "unit_of_measurement": "changes"
+            },
+            "change_closed_completed_count": {
+                "name": "Closed and completed tickets",
+                "unit_of_measurement": "changes"
+            },
+            "change_new_tickets_today": {
+                "name": "New tickets today",
+                "unit_of_measurement": "changes"
+            },
+            "change_completed_tickets_today": {
+                "name": "Completed tickets today",
+                "unit_of_measurement": "changes"
             }
         }
     }

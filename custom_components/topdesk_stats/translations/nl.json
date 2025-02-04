@@ -9,16 +9,16 @@
                     "instance_host": "TOPdesk URL",
                     "instance_username": "API account gebruikersnaam",
                     "instance_password": "API applicatie wachtwoord",
-                    "enable_incidents": "Meldingen",
-                    "enable_changes": "Wijzigingen"
+                    "enable_incidents": "Meldingenbeheer",
+                    "enable_changes": "Wijzigingsbeheer"
                 },
                 "data_description": {
                     "instance_name": "De naam van jouw TOPdesk omgeving",
                     "instance_host": "De basis TOPdesk URL, begint met https://",
                     "instance_username": "De gebruikersnaam van het API account",
                     "instance_password": "Het applicatiewachtwoord van het API account",
-                    "enable_incidents": "Meldingen",
-                    "enable_changes": "Wijzigingen"
+                    "enable_incidents": "Gegevens van meldingen ophalen",
+                    "enable_changes": "Gegevens van wijzigingen ophalen"
                 }
             }
         },
@@ -45,8 +45,8 @@
                     "instance_host": "TOPdesk URL",
                     "instance_username": "API account gebruikersnaam",
                     "instance_password": "API applicatie wachtwoord",
-                    "enable_incidents": "Meldingen",
-                    "enable_changes": "Wijzigingen"
+                    "enable_incidents": "Meldingenbeheer",
+                    "enable_changes": "Wijzigingsbeheer"
                 },
                 "data_description": {
                     "update_interval": "De interval waarmee de data bijgewerkt wordt.",
@@ -54,8 +54,8 @@
                     "instance_host": "De basis TOPdesk URL, begint met https://",
                     "instance_username": "De gebruikersnaam van het API account",
                     "instance_password": "Het applicatiewachtwoord van het API account",
-                    "enable_incidents": "Meldingen",
-                    "enable_changes": "Wijzigingen"
+                    "enable_incidents": "Gegevens van meldingen ophalen",
+                    "enable_changes": "Gegevens van wijzigingen ophalen"
                 }
             }
         }
@@ -75,6 +75,10 @@
     },
     "entity": {
         "sensor": {
+            "incident_total_tickets": {
+                "name": "Meldingen totaal",
+                "unit_of_measurement": "meldingen"
+            },
             "incident_completed_tickets": {
                 "name": "Meldingen gereed",
                 "unit_of_measurement": "meldingen"
@@ -90,6 +94,26 @@
             "incident_completed_tickets_today": {
                 "name": "Meldingen gereedgemeld vandaag",
                 "unit_of_measurement": "meldingen"
+            },
+            "change_total_tickets": {
+                "name": "Wijzigingen totaal",
+                "unit_of_measurement": "wijzigingen"
+            },
+            "change_completed_tickets": {
+                "name": "Wijzigingen gereed",
+                "unit_of_measurement": "wijzigingen"
+            },
+            "change_closed_completed_count": {
+                "name": "Wijzigingen afgesloten",
+                "unit_of_measurement": "wijzigingen"
+            },
+            "change_new_tickets_today": {
+                "name": "Wijzigingen nieuw vandaag",
+                "unit_of_measurement": "wijzigingen"
+            },
+            "change_completed_tickets_today": {
+                "name": "Wijzigingen afgesloten vandaag",
+                "unit_of_measurement": "wijzigingen"
             }
         }
     }

@@ -130,24 +130,24 @@ class TopdeskOptionsFlowHandler(config_entries.OptionsFlow):
         # Get the update_interval from the configuration, with fallback to the default
         options_schema = vol.Schema(
             {
-                # vol.Optional(
-                #     CONF_INSTANCE_USERNAME,
-                #     default=self.config_entry.options.get(
-                #         CONF_INSTANCE_USERNAME, CONF_INSTANCE_USERNAME
-                #     ),
-                # ): cv.string,
-                # vol.Optional(
-                #     CONF_INSTANCE_PASSWORD,
-                #     default=self.config_entry.options.get(
-                #         CONF_INSTANCE_PASSWORD, CONF_INSTANCE_PASSWORD
-                #     ),
-                # ): cv.string,
-                # vol.Optional(
-                #     CONF_INSTANCE_HOST,
-                #     default=self.config_entry.options.get(
-                #         CONF_INSTANCE_HOST, "DEFAULT_INSTANCE_HOST"
-                #     ),
-                # ): cv.string,
+                # fix this # vol.Optional(
+                # fix this #     CONF_INSTANCE_USERNAME,
+                # fix this #     default=self.config_entry.options.get(
+                # fix this #         CONF_INSTANCE_USERNAME, CONF_INSTANCE_USERNAME
+                # fix this #     ),
+                # fix this # ): cv.string,
+                # fix this # vol.Optional(
+                # fix this #     CONF_INSTANCE_PASSWORD,
+                # fix this #     default=self.config_entry.options.get(
+                # fix this #         CONF_INSTANCE_PASSWORD, CONF_INSTANCE_PASSWORD
+                # fix this #     ),
+                # fix this # ): cv.string,
+                # fix this # vol.Optional(
+                # fix this #     CONF_INSTANCE_HOST,
+                # fix this #     default=self.config_entry.options.get(
+                # fix this #         CONF_INSTANCE_HOST, "DEFAULT_INSTANCE_HOST"
+                # fix this #     ),
+                # fix this # ): cv.string,
                 vol.Required(
                     CONF_UPDATE_INTERVAL,
                     default=self.config_entry.options.get(
